@@ -1,0 +1,399 @@
+<html>
+    <head>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link href=/static/css/main.css rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="/pygments.css">
+        <title>从零开始的PY交易</title>
+    </head>
+    <body>
+        <h1>从零开始的PY交易: Python语言介绍</h1>
+<blockquote>
+<p>@oaoouo 2017年10月2日</p>
+</blockquote>
+<h2>目录</h2>
+<ul>
+<li>Python语言基础<ol>
+<li>Python简介</li>
+<li>Python数据类型</li>
+<li>Python基本语句</li>
+<li>Python语言特性</li>
+<li>常用的Python内置模块</li>
+</ol>
+</li>
+<li>Python应用举例<ol>
+<li>web开发方向</li>
+<li>数据处理方向</li>
+<li>awesome python</li>
+</ol>
+</li>
+</ul>
+<h2>Python语言基础</h2>
+<h3>Python简介</h3>
+<p>Python诞生于1991年, 是作者<a href="https://gvanrossum.github.io/">guido van rossum</a>为了打发圣诞节无聊假期hacking的一个项目. 名字来源于喜剧<code>monty python's flying circus</code>. <br/>
+<img alt="guido" src="https://gvanrossum.github.io/images/IMG_2192.jpg" /> <br/>
+Python语法主要借鉴了abc、c、perl; Python的设计目标是<strong>简单</strong>、<strong>易读</strong> 以及<strong>可扩展</strong>. <br/>
+<a href="http://www.cnblogs.com/vamei/archive/2013/02/06/2892628.html">更多关于Python的历史点这里</a></p>
+<h3>Python语言结构</h3>
+<p>Python是一门解释型语言(动态语言).</p>
+<div class="codehilite"><pre><span></span>----------------------
+|       源代码        |
+----------------------
+          |　每行代码
+          v
+----------------------
+|       解释器        | -&gt; 还可以在交互模式下运行
+----------------------
+          |
+          v
+----------------------
+|       字节码        | -&gt; 可重用的字节码保存在.pyc文件中
+----------------------
+\/\/\/\/\/\/\/\/\/\/\/
+    跨平台运行
+</pre></div>
+
+
+<p>Python解释器负责将Python源程序翻译成字节码, 官方实现是<a href="https://github.com/python/cpython">CPython</a>. 在终端键入<code>python</code>, 可以进入Python解释器交互模式. 推荐ptpython、ipython]等具有自动补全以及语法高亮的Python交互解释器.</p>
+<h3>Python数据类型</h3>
+<p><strong>Python中一切皆为对象</strong>, 所有变量、类、数据类型都是Object类的对象. <br/>
+Python变量的声明和初始化不需要声明类型(这是Python方便的一点也是之所以慢的原因). 比如创建一个名称为a值为1.4的变量:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt; a = 1.4
+</pre></div>
+
+
+<p>Python解释器在解释这一行时会自动根据右边的值判断左边变量的类型(这里是float)并分配空间. <br/>
+注意啦, 这里的a只是一个引用指向在堆上分配的存储1.4的内存, 每当这块内存被新的标签引用时, 引用计数就会加一, 方便gc在空闲的时候<a href="https://neo1218.github.io/pymemory/">进行垃圾回收</a>. <br/></p>
+<p>Python的对象分为<strong>可变(mutable)</strong>和<strong>不可变对象(immutable)</strong>两大类, <strong>元组、数值、字符串属于不可变对象</strong>; <strong>字典和列表属于可变对象</strong>. 举个例子:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; a = 1
+&gt;&gt;&gt; b = a
+&gt;&gt;&gt; a = 2
+&gt;&gt;&gt; id(a) == id(b) # id(obj)获取obj内存地址的10进制表示
+False
+</pre></div>
+
+
+<p>因为数值型对象是不可变的, 所以a=2会新开辟一块内存存储2, 将a变量绑定到新的内存.</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; a = [1]
+&gt;&gt;&gt; b = a                                  
+&gt;&gt;&gt; a[0] = 2                               
+&gt;&gt;&gt; id(a) == id(b)                         
+True
+</pre></div>
+
+
+<p>因为列表是可变对象, 所以修改a引用的列表不会创建新的列表对象. <br/></p>
+<p>接下来具体说说数值、字符串、列表、元组和字典. <br/></p>
+<h4>数值</h4>
+<p>整数、浮点数(单精度、双精度)都属于数值类型, Python中创建该类型的变量很简单:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; a = 1.4
+&gt;&gt;&gt; print(a)
+1.4
+</pre></div>
+
+
+<h4>字符串</h4>
+<p>相比于C中的字符数组、Java中的String类. Python字符串的创建和使用简直太方便了.</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; s = &quot;oaoouo&quot; # 双引号和单引号都可以
+&gt;&gt;&gt; print(s)
+&quot;oaoouo&quot;
+</pre></div>
+
+
+<p>Python内置了大量字符串操作函数, 比如:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; s = &quot;1;2;3;4;5&quot;
+&gt;&gt;&gt; s.split(&#39;;&#39;)  # 根据;分割字符串s
+[&#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;]
+</pre></div>
+
+
+<p>字符串拼接也很简单:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; s1 = &quot;neo1218&quot;
+&gt;&gt;&gt; s2 = &quot;oaoouo&quot;
+&gt;&gt;&gt; s1 + s2
+&quot;neo1218oaoouo&quot;
+</pre></div>
+
+
+<p>字符串处理体现了Python语言简洁、优雅的设计理念, 使得Python非常适合Web开发等需要大量处理字符串的开发场景. <br/>
+Python是一门动态语言, 在程序运行时分配内存, 所以静态语言中的内存优化策略在Python中无法实现(比如C#中相同内容的字符串变量只引用一块内存). Python怎么办呢? 那只有靠猜了, Python会缓存常用的字符串和小整数(-5~120), 比如:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; a = 1
+&gt;&gt;&gt; b = 1
+&gt;&gt;&gt; a is b
+True
+
+这里的1就被缓存起来了.
+字符串的缓存有点小复杂:
+
+&gt;&gt;&gt; a = &quot;短字符串&quot;
+&gt;&gt;&gt; b = &quot;短字符串&quot;
+&gt;&gt;&gt; a is b
+True
+&gt;&gt;&gt; a = &quot;长字符串&quot;*1000
+&gt;&gt;&gt; b = &quot;长字符串&quot;*1000
+&gt;&gt;&gt; a is b
+False
+&gt;&gt;&gt; a = &quot;短 字符串&quot;
+&gt;&gt;&gt; b = &quot;短 字符串&quot;
+&gt;&gt;&gt; a is b
+False
+</pre></div>
+
+
+<p>python会缓存短字符串, 但是如果短字符串中有空格则不会被缓存orz.个人理解, 使用比较频繁的字符串就是变量名了(字母、数字、下划线), 所以进行缓存. 毕竟缓存也是需要内存开销的, 所以缓存大整数、长字符串就得不偿失了.</p>
+<h4>列表</h4>
+<p>Python列表功能类似C中的数组, 使用起来非常简单. <br/></p>
+<p><strong>创建列表</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; l = [1, 2, 3, 4, 5]
+</pre></div>
+
+
+<p><strong>索引列表中的元素</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; l[0] = 1
+&gt;&gt;&gt; l[2] = 3
+&gt;&gt;&gt; l[-1] = 5  # 特色, 还可以反向索引:)
+</pre></div>
+
+
+<p><strong>切片</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; l[0:4]
+[1, 2, 3, 4]
+&gt;&gt;&gt; l[-1: 2: -1]  # 第三个-1表示反向索引
+[5, 4]
+&gt;&gt;&gt; l[0:4:2]  # 第三个2表示每隔2个元素
+[1, 3]
+</pre></div>
+
+
+<p><strong>列表属性</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; len(l)  # 列表的长度
+5
+&gt;&gt;&gt; sum(l)  # 列表中元素的和
+15
+</pre></div>
+
+
+<p><strong>for...in遍历列表</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; for i in l:
+&gt;&gt;&gt; .... print(l),
+&gt;&gt;&gt; 1 2 3 4 5
+</pre></div>
+
+
+<h4>字典</h4>
+<p>字典是hash表数据结构, 存储键值极其对应关系.</p>
+<p><strong>创建字典</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; d = {&#39;name&#39;: &#39;oaoouo&#39;}  # 第一个元素是键(不可变改变类型)
+&gt;&gt;&gt;                          # 第二个元素是值(任意类型)
+</pre></div>
+
+
+<p><strong>根据字典的键取值</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; d[&#39;name&#39;]  # or d.get(&#39;name&#39;)
+&gt;&gt;&gt; &#39;oaoouo&#39;
+</pre></div>
+
+
+<p><strong>向字典中添加键值</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; d[&#39;age&#39;] = 22  # &#39;age&#39;键不在字典中, 所以添加; 如在字典中则修改键值.
+&gt;&gt;&gt; d
+{&#39;name&#39;: &#39;oaoouo&#39;, &#39;age&#39;: 22}
+</pre></div>
+
+
+<p><strong>返回字典中的所有键or键值</strong></p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; d.keys()
+[&#39;age&#39;, &#39;name&#39;]
+&gt;&gt;&gt; d.values()
+[22, &#39;oaoouo&#39;]
+</pre></div>
+
+
+<p>最后说一下, 字典是无序的, 它主要用来存储, 与键的顺序无关. <br/></p>
+<h4>元组</h4>
+<p>元组简单理解就是不可变的列表. <br/></p>
+<p><strong>创建元组</strong>:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; t = (1, 2, 3, 4, 5)
+</pre></div>
+
+
+<p>元组也可以向列表一样索引、切片、遍历.</p>
+<h3>Python基本语句</h3>
+<h4>条件语句</h4>
+<p>Python条件语句的关键字有<strong>if</strong>、<strong>else</strong>、<strong>else if 或者简写elif</strong>. 举个小栗子:</p>
+<div class="codehilite"><pre><span></span>if (a == 1):
+    print(&#39;one&#39;)
+elif (a == 2):
+    print(&#39;two&#39;)
+else:
+    print(None)
+</pre></div>
+
+
+<p>上面这段代码还可以省略最后一个else:</p>
+<div class="codehilite"><pre><span></span>if (a == 1):
+    print(&#39;one&#39;)
+elif (a == 2):
+    print(&#39;two&#39;)
+print(None)
+</pre></div>
+
+
+<h4>循环语句</h4>
+<p>Python循环有<strong>for...in循环</strong>和<strong>while</strong>循环. 先举个while循环的例子:</p>
+<div class="codehilite"><pre><span></span>while (a = 1):
+    print(&quot;oaoouo ahahaha&quot;)
+</pre></div>
+
+
+<p>如果是永久循环, <code>while (True)</code> 就行啦! <br/></p>
+<p><code>for...in</code>循环可以用于遍历可迭代对象, 由于这一篇是入门, 所以就不具体介绍可迭代对象了, 像之前的列表和元组都是可迭代对象. <br/>
+那么如何像C中for循环一样拿到迭代元素在列表中的位置呢?  这就需要用到enumerate函数啦:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; for index, value in enumerate([1, 2, 3, 4, 5]):
+&gt;&gt;&gt; .... print({index: value})
+{0: 1} {1: 2} {2: 3} {3: 4} {4: 5}
+</pre></div>
+
+
+<h4>列表生成式和元组生成式</h4>
+<p>比如我想构造这样的一个列表: <code>[(key1, value1), (key2, value2)]</code>, 列表的元素是一个元组, 元组里分别是字典的键和键值, 我们可以这样写:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; d = {&#39;name&#39;: &#39;oaoouo&#39;, &#39;age&#39;: 22}
+&gt;&gt;&gt; l = []             
+&gt;&gt;&gt; .... for i, j in enumerate(d.keys()):           
+&gt;&gt;&gt; ....     l.append((j, d.values()[i]))
+&gt;&gt;&gt; l
+[(&#39;age&#39;, 22), (&#39;name&#39;, &#39;oaoouo&#39;)]
+</pre></div>
+
+
+<p>但用列表生成式一行代码就搞定了! </p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; l = [(j, d.values()[i]) for i, j in enumerate(d.keys())]
+&gt;&gt;&gt; l
+[(&#39;age&#39;, 22), (&#39;name&#39;, &#39;oaoouo&#39;)]
+</pre></div>
+
+
+<p>当然用Python内置的zip函数就更简单了...orz</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; l = zip(d.keys(), d.values())
+&gt;&gt;&gt; l
+[(&#39;age&#39;, 22), (&#39;name&#39;, &#39;oaoouo&#39;)]
+</pre></div>
+
+
+<p>列表生成式生成的是列表, 元组生成式生成的是生成器, 把列表生成式[]改成元组()就行了:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; l = ((j, d.values()[i]) for i, j in enumerate(d.keys()))
+&gt;&gt;&gt; l
+&lt;generator object &lt;genexpr&gt; at 0x7f1a4e0b62d0&gt;
+</pre></div>
+
+
+<p>至于什么是生成式, 这篇就不说了.</p>
+<h3>Python函数</h3>
+<p>Python函数使用<strong>def关键字</strong>创建:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; def test_func(x):
+&gt;&gt;&gt; ....    if x &gt; 1:
+&gt;&gt;&gt; ....       return 1
+&gt;&gt;&gt; ....    return 0
+&gt;&gt;&gt; print(test_func(1))
+0
+</pre></div>
+
+
+<h3>Python面向对象</h3>
+<p>Python类使用class关键字创建:</p>
+<div class="codehilite"><pre><span></span><span class="kr">class</span> <span class="nx">Man</span><span class="p">(</span><span class="nx">object</span><span class="p">)</span><span class="o">:</span>  <span class="err">#</span> <span class="nx">object</span><span class="err">是所有类的基类</span><span class="p">,</span> <span class="nx">Python3</span><span class="err">中可以不写</span><span class="p">.</span>
+    <span class="nx">def</span> <span class="nx">__init__</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">age</span><span class="p">)</span><span class="o">:</span>
+        <span class="err">#</span> <span class="nx">__init__</span><span class="err">是初始化方法</span><span class="p">.</span> <span class="err">构造函数是</span><span class="nx">__new__</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">age</span> <span class="o">=</span> <span class="nx">age</span>
+
+    <span class="nx">def</span> <span class="nx">get_info</span><span class="p">(</span><span class="nx">self</span><span class="p">)</span><span class="o">:</span>
+        <span class="nx">print</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">age</span><span class="p">)</span>
+
+    <span class="kd">@classmethod</span>
+    <span class="nx">def</span> <span class="nx">this_is_a_classmethod</span><span class="p">()</span><span class="o">:</span>
+        <span class="nx">pass</span>
+
+    <span class="kd">@staticmethod</span>
+    <span class="nx">def</span> <span class="nx">this_is_a_staticmethod</span><span class="p">()</span><span class="o">:</span>
+        <span class="nx">pass</span>
+
+    <span class="nx">def</span> <span class="nx">__repr__</span><span class="p">(</span><span class="nx">self</span><span class="p">)</span><span class="o">:</span>
+        <span class="err">#</span> <span class="err">类对象的默认表示</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Man(name=%s, age=%s)&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">age</span><span class="p">)</span>
+</pre></div>
+
+
+<p>使用:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; oaoouo = Man(&quot;oaoouo&quot;, 22)
+&gt;&gt;&gt; oaoouo
+&lt;Man(name=oaoouo, age=22)&gt;
+&gt;&gt;&gt; oaoouo.get_info()
+(&quot;oaoouo&quot;, 22)
+</pre></div>
+
+
+<p>Python面向对象没有Java、C#这样严格, 没有各种控制访问的关键字(public、private、protected、final...), 主要还是靠自觉...</p>
+<h3>Python输入输出</h3>
+<p><strong>从标准输入到标准输出</strong> <br/>
+Python从标准输入中读取字符串使用<strong>raw_input()</strong>函数, 结合while循环就可以读取多行以回车换行分割的字符串:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; cnt = 3
+&gt;&gt;&gt; l = []
+&gt;&gt;&gt; while cnt:
+...     l.append(raw_input())
+...     cnt -= 1
+1 2 3
+1 2
+3
+&gt;&gt;&gt; print(l)
+[&#39;1 2 3&#39;, &#39;1 2&#39;, &#39;3&#39;]
+</pre></div>
+
+
+<p>至于输出, print就行啦! <br/></p>
+<p><strong>Python读写文件</strong> <br/>
+使用内置的open函数打开文件拿到文件操作句柄f, 使用<strong>f.read()</strong>、<strong>f.write()</strong>即可进行文件读写.</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; f = open(&#39;./test.txt&#39;)
+&gt;&gt;&gt; content = f.read()
+&#39;this is a test file\nyes, test\nhahahhahahahahha\n&#39;
+&gt;&gt;&gt; content.split(&#39;\n&#39;)
+[&#39;this is a test file&#39;, &#39;yes, test&#39;, &#39;hahahhahahahahha&#39;, &#39;&#39;]  # 每个元素就是一行, 是不是很有用!
+&gt;&gt;&gt; f.close()
+</pre></div>
+
+
+<p>最后不要忘记调用f.close()将打开的文件从内存写回硬盘哦. 如果实在记不住调用f.close(), 不用烦, <strong>with语句</strong>来帮你:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; with open(&#39;./test.txt&#39;) as f:
+&gt;&gt;&gt;     content = f.read()
+&gt;&gt;&gt;     print(content.split(&#39;\n&#39;))
+[&#39;this is a test file&#39;, &#39;yes, test&#39;, &#39;hahahhahahahahha&#39;, &#39;&#39;]
+</pre></div>
+
+
+<p>with语句会自动帮你清理上下文, 调用f.close()! <br/>
+接下来, 继续举一个写文件的例子:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; with open(&#39;./test.txt&#39;, &#39;rw+&#39;) as f:  # &#39;rw+&#39;表示可读、可追加写
+&gt;&gt;&gt;     f.write(&#39;new content&#39;)
+&gt;&gt;&gt; f = open(&#39;./test.txt&#39;)
+&gt;&gt;&gt; f.read()
+&#39;this is a test file\nyes, test\nhahahhahahahahha\nnew content\n&#39;
+&gt;&gt;&gt; f.close()
+</pre></div>
+
+
+<h3>常用的Python内置模块</h3>
+<p>Python除了提供了各种好用的函数外, 还提供了很多有用的模块, 比如<strong>os</strong>、<strong>sys</strong>、<strong>shutil</strong>等. <br/>
+比如platform模块可以获取操作系统平台信息:</p>
+<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">platform</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">platform</span><span class="o">.</span><span class="n">linux_distribution</span><span class="p">()</span>
+<span class="p">(</span><span class="s1">&#39;Kali&#39;</span><span class="p">,</span> <span class="s1">&#39;kali-rolling&#39;</span><span class="p">,</span> <span class="s1">&#39;kali-rolling&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<h2>Python应用举例</h2>
+<h3>web方向</h3>
+<h3>数据处理方向</h3>
+<h3>awesome_python</h3>
+<h2>资源附录</h2>
+    </body>
+</html>

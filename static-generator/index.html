@@ -1,0 +1,155 @@
+<html>
+    <head>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link href=/static/css/main.css rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="/pygments.css">
+        <title>一起写个静态博客生成器</title>
+    </head>
+    <body>
+        <h1>一起写一个静态博客生成器</h1>
+<p><img alt="frozenblue" src="https://user-images.githubusercontent.com/31455293/30240563-72a4593e-95a5-11e7-83ee-f79732ffd9e8.jpg" /></p>
+<h2>前言</h2>
+<p>作为一名技术宅, 平时除了写代码就是写写博客. 搭建博客一般有三种途径: 1~用CSDN等公司提供的博客; 2~自己动手; 3~基于github等git服务商提供的静态站点搭博客. <br/>
+第一种博客主题有点丑（⊙ｏ⊙）…而且不能定制, 否决掉; 第二种我试过, 首先买个服务器+域名一个月就要不少钱, 而且数据要自己存储, 更麻烦的是每次部署都要手动将博客传到服务器上, 也放弃了; 第三种方法就方便多了, 首先域名github.io就解决了, 而且生成的静态化站点托管在github的服务器上, 也不需要自己买服务器, 部署博客也方便, git add/commit/push 3步搞定! <br/>
+现在最流行的静态博客生成器应该是hexo. 之前还是Mac的时候用的就是hexo, 后来Mac进水了换到kali linux, hexo装了半晚上总是报错. 最终下定决心自己写一个静态博客生成器. <br/></p>
+<h2>什么是静态博客生成器?</h2>
+<p>静态博客生成器是一个自动化工具, 提供简单的命令行接口执行<strong>博客生成</strong>; <strong>博客静态化</strong>; <strong>博客部署</strong>等任务, 并向用户提供配置接口以自定义博客. 静态博客生成器同github pages服务一起, 让博客的生成和部署变得极其方便. <br/></p>
+<h2>希望实现的效果</h2>
+<p>最终做出来的是一个命令行工具, 起名叫railgun(电磁炮), 她的API如下:</p>
+<ul>
+<li><strong>$ railgun init</strong>: 生成本地博客目录</li>
+<li><strong>$ railgun new</strong>:  生成新的博客模板</li>
+<li><strong>$ railgun build</strong>: 静态化本地博客站点</li>
+<li><strong>$ railgun upload</strong>: 将本地静态站点部署到用户配置的git pages服务上</li>
+<li><strong>$ railgun server</strong>: 本地预览</li>
+<li><strong>$ railgun upgrade</strong>: 更新博客主题</li>
+</ul>
+<p>本地博客提供配置文件供用户填写基本信息、部署地址等配置项.</p>
+<h2>思路</h2>
+<p>如果上来就从静态化模块开始码会不知从何下手. 其实静态博客生成器听起来很高大上, 但她最终生成的不过就是一个博客, 最终部署的也还是这个博客. 所以不如先把这个博客搭建运行起来, 然后再想办法静态化这个博客, 最终把这些步骤构建成自动化的命令行工具, 不就搞定了吗Ｏ（∩＿∩）Ｏ! <br/></p>
+<h2>实现本地博客</h2>
+<p>本地博客不会太复杂, 因为最终需要静态化, 所以数据库什么的是不需要的. 我这里选择用Flask搭建本地博客. <br/>
+选择Flask的原因有三: 一是发现了一个十分强大的Flask扩展<a href="https://pythonhosted.org/Flask-FlatPages/">Flask-FlatPages</a>, 使用这个扩展可以很方便的管理各种格式的博客文件(md, rst); 二是Flask强大的路由系统方便了静态生成器的实现; 三是Flask内置的前端模板Jinja2语法简单、优雅, 方便用户(特别是非前端程序员)自定义主题. <br/>
+当然, Flask也有缺点, 考虑静态生成器静态化速度的时候会说（⊙﹏⊙）ｂ <br/>
+本地博客的目录结构如下:</p>
+<script src="https://gist.coding.net/u/neo1218/9203ccd532bd45f4b09475d85712d1d2.js"></script>
+
+<p>pages目录存放用户编写的博客文件, 博客格式可以在config.py中进行配置. config.py有如下配置项:</p>
+<script src="https://gist.coding.net/u/neo1218/07d4da27cf764068865a69357f92eb57.js"></script>
+
+<p>配置项以字典的形式汇总, 传入所有页面:</p>
+<script src="https://gist.coding.net/u/neo1218/f423a78353be4614abce794fef6568df.js"></script>
+
+<p>这样用户就可以在自定义主题的过程中任意使用这些配置. <br/></p>
+<p>接下来说说本地博客的核心插件: <strong>Flask-FlatPages</strong>. 因为是静态化博客, 所以没有数据库, 那么如何方便的对博客文件集合进行查找和访问呢?</p>
+<div class="codehilite"><pre><span></span>Flask-FlatPages provides a collections of pages to your Flask application.
+Pages are built  from “flat” text files as opposed to a relational database.
+</pre></div>
+
+
+<p>Flask-FlatPages完美的符合了我们的需求! 使用起来很简单:</p>
+<script src="https://gist.coding.net/u/neo1218/a7d7ed49dd904a9cac9d9697867bee8a.js"></script>
+
+<p>上面这个视图函数实现了通过相对路径查找某篇博客并传入前端模板进行渲染的功能,</p>
+<script src="https://gist.coding.net/u/neo1218/e6f0e8017a4248f3b82a9f64bce001b0.js"></script>
+
+<p><code>post.html | safe</code> 自动过滤掉不安全字符并将html渲染为markdown.</p>
+<p>OK! 现在我们的本地博客实现了配置接口、博客文件管理和访问,</p>
+<p><code>$ python manage.py runserver</code></p>
+<p>便可运行这个博客. <br/></p>
+<p>接下来我们要开始思考如何静态化这个博客啦! <br/></p>
+<h2>实现静态生成器</h2>
+<h3>什么是静态化?!</h3>
+<p>我们搭建的本地博客是不能直接部署在github pages服务上的, 因为我们的博客是Python程序需要启动Web服务器运行. 而github pages不是一个应用环境, 他只是一个git仓库, 里面只能放静态文件. <strong>所以静态化的思路就是在本地运行博客并请求所有路由, 将请求得到的html响应(包含格式)写入html文件, 并将html文件部署在github上</strong>. 这样请求博客路由, github服务器就会返回写有html的静态文件, 这就是其被称为静态化的原因.<br/>
+静态化也有局限的地方, 那就是无法实现用户登录等动态交互功能. 不过博客本来就是用来看的, 这些局限不是太大的问题. <br/></p>
+<h3>实现</h3>
+<p>通过上段的介绍, 我们知道了实现静态生成器的2个关键环节:</p>
+<ol>
+<li><strong>获取所有路由</strong></li>
+<li><strong>模拟请求所有路由, 将响应写入文件</strong></li>
+</ol>
+<p>先看看如何获取所有路由吧. <br/>
+本地博客的所有URL(路由)分为三大类: 第一类是不含参数的确定路由, 有如下这些</p>
+<script src="https://gist.coding.net/u/neo1218/b4d7dde3597546d19e1ae81059be9997.js"></script>
+
+<p>这类路由是固定的, 与博客的数量无关. <br/></p>
+<p>第二类是需要通过<strong>url_for</strong>生成完整url的含参数动态路由, 有如下这些</p>
+<script src="https://gist.coding.net/u/neo1218/21dc57cf67df4b1c96cd71120fe2c7fd.js"></script>
+
+<p>这些路由通过url_for传参生成, 比如通过相对路径访问博客页面的路由:</p>
+<script src="https://gist.coding.net/u/neo1218/6f76d591f3274319be0264a2006110d7.js"></script>
+
+<p><code>.post</code>表示生成post视图函数对应的路由, <code>path=post.path</code>就是将<code>post.path</code>的值传给path参数构建完整url. <br/></p>
+<p>第三类路由是Flask默认处理静态资源的路由, 不需要用户定义, 可以通过<code>url_for</code>生成:</p>
+<script src="https://gist.coding.net/u/neo1218/ff164dbeaae9492eb03f748edc7fcf08.js"></script>
+
+<p>加载相应路径下的静态资源(<code>static/css/application.css</code>, <code>static/js/application.js</code>). <br/></p>
+<p>第二和第三类路由的数量是不确定的, 第一类路由虽然固定, 但是写死似乎不太好看(⊙﹏⊙)b, 那么如何获取所有路由呢? 蛤! Flask的膜法就起作用啦! <br/></p>
+<p>所有路由可以通过iter_rules()方法获取:</p>
+<div class="codehilite"><pre><span></span>&gt;&gt;&gt; list(app.url_map.iter_rules())
+[&lt;Rule &#39;/archives/&#39; (HEAD, OPTIONS, GET) -&gt; archives&gt;,
+ &lt;Rule &#39;/about/&#39; (HEAD, OPTIONS, GET) -&gt;about&gt;,
+ &lt;Rule &#39;/tags/&#39; (HEAD, OPTIONS, GET) -&gt; tags&gt;,
+ &lt;Rule &#39;/&#39; (HEAD, OPTIONS, GET) -&gt; index&gt;,
+ &lt;Rule &#39;/archive/&lt;year&gt;/&#39; (HEAD, OPTIONS, GET) -&gt; archive&gt;,
+ &lt;Rule &#39;/static/&lt;filename&gt;&#39; (HEAD, OPTIONS, GET) -&gt; static&gt;,
+ &lt;Rule &#39;/tag/&lt;tag&gt;/&#39; (HEAD, OPTIONS, GET) -&gt; tag&gt;,
+ &lt;Rule &#39;/&lt;path&gt;/&#39; (HEAD, OPTIONS, GET) -&gt; post&gt;]
+</pre></div>
+
+
+<p>这样第一类路由就可以轻松拿到了. <br/>
+那么动态路由怎么处理呢? 对于动态路由肯定不能指望一个方法返回所有路由,
+因为动态路由只有在请求传入参数的时候才能确定, 所以如果能设置一个<strong>url_for钩子</strong>,
+在每次调用<code>url_for</code>时将<code>url_for</code>生成的路由存储起来就好了.
+Flask就提供了这样一个接口: <a href="http://flask.pocoo.org/docs/0.11/patterns/urlprocessors/"><strong>url processors</strong></a></p>
+<div class="codehilite"><pre><span></span>url processors can automatically inject values into a call for url_for() automatically.
+</pre></div>
+
+
+<p>我们可以实现这样一个钩子, 在第一次调用<code>url_for</code>时将动态生成的url存储到双端队列<code>self.calls</code>中:</p>
+<script src="https://gist.coding.net/u/neo1218/91c726f895294039a6b080d89c171d75.js"></script>
+
+<p>这样我们就可以拿到所有的动态路由啦! 至于call为什么用<code>collections.deque</code>实现, 因为这个类型是线程安全的.<br/></p>
+<p>接下来就是发模拟请求并将响应写入文件, 可以用Flask的<code>app.test_client()</code>发送请求. 顾名思义, 这个API本身是用于测试的, 这里正好可以用.</p>
+<script src="https://gist.coding.net/u/neo1218/6268d45c87e540de9d6f55ac2d851ad8.js"></script>
+
+<p>说说这里为什么用了yield. 静态博客生成器速度是关键, 一些爱写博客的人可能有几百篇博客, 对每个博客进行请求并等待响应, 这个过程中的网络IO是非常耗时的. 为了提升速度, 我一开始想到的是用协程进行处理, 然而可惜, Flask是线程模型, <code>gen_client.get</code>不是coroutine...
+所以这里的yield其实并没有什么卵用... 至于多线程, GIL...  一个生成器开多进程又有点小题大做了. 测了一下生成速度, 200篇文章5s(包含外部图片请求), 可以接受, 那就这样吧.(ps: 等我写到200篇会优化的O(∩_∩)O) <br/>
+将响应写入文件很简单, 直接上代码:</p>
+<script src="https://gist.coding.net/u/neo1218/76fcd8fa5c3c45a5b545a7b6cdbb1e9a.js"></script>
+
+<p>综上, 生成器程序的核心结构是两个类: <strong>Gen类</strong>和<strong>UrlForGen类</strong>, Gen类用于处理第一类路由, 包含一个入口方法(gen). <strong>UrlForGen</strong>是一个上下文管理器类, with该类对象, 插入钩子获取动态路由, 传递给gen处理. 最后gen方法模拟请求所有路由, 并将响应写入文件存入相应目录. 完成静态化!</p>
+<h2>实现命令行接口</h2>
+<p>OK! 现在我们已经完成了本地博客和静态化模块. 接下来就要码最终呈现给用户的命令行接口啦. <br/>
+我选择了<a href="https://github.com/pallets/click">click框架</a>来实现命令行接口. click使用起来很简单</p>
+<script src="https://gist.coding.net/u/neo1218/1f5f5cb1c3394f318b2eb48af3d4e560.js"></script>
+
+<p>接下来我们一个命令一个命令的看. <br/></p>
+<h3>railgun init</h3>
+<p><code>railgun init</code>的作用是创建用户本地博客. 也就是想办法把我们搭建的本地博客模块拷贝到用户指定的路径处. 我们知道一开始用户安装railgun的时候会安装相应的代码到命令目录下, 如果我们把本地博客打包连同命令一起上传, 用户安装后就会在自己的电脑上拥有一个本地博客副本了! 而且我们不用管用户把railgun命令安装在<code>/bin/</code>、<code>/usr/bin/</code>还是<code>/usr/local/bin/</code>, 我们只需要使用相对路径定位本地博客目录, 就可以找到它了!</p>
+<script src="https://gist.coding.net/u/neo1218/926124c905f04b22b49814e3fd4a9354.js"></script>
+
+<h3>railgun new</h3>
+<p><code>railgun new</code>用于新建一篇博客, </p>
+<script src="https://gist.coding.net/u/neo1218/b209719a1bbe499195b22a1e4863fa0e.js"></script>
+
+<p>用户执行<code>railgun命令</code>时的目录是本地博客的根目录, 顺着相对路径就可以找到存放博客的pages目录了, 然后新建一篇博客.</p>
+<h3>railgun server</h3>
+<p><code>railgun server</code>会启动预览服务器, 这里直接用<code>os.popen()</code>调用<code>python
+manage.py runserver</code>就可以了,</p>
+<script src="https://gist.coding.net/u/neo1218/bcfe5ca840904d0eb78f6904fa0780e5.js"></script>
+
+<h3>railgun build</h3>
+<p><code>railgun build</code>用于静态化博客. 考虑到我们的静态化模块需要依赖Flask API(iter_rules, url processors)以及用户配置(GEN_BASE_URL)工作, 所以我把静态化模块的启动放到了本地博客的manage.py中:</p>
+<script src="https://gist.coding.net/u/neo1218/212fd5c9667b4b2baa15bffcc43ed39e.js"></script>
+
+<p>然后<code>railgun build</code>调用<code>os.popen('python manage.py build')</code>执行静态化工作.</p>
+<h3>railgun upload</h3>
+<p><code>railgun upload</code>根据用户配置将静态博客部署到指定git仓库上.</p>
+<h3>railgun upgrade</h3>
+<h2>主题系统</h2>
+<h2>接下来</h2>
+    </body>
+</html>
